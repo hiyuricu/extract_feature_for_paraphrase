@@ -33,8 +33,13 @@ def main(read_file):
             wf.write("%s\t%s\t%s\n" % (features[0], features[3], features[4]))
     wf.close()
 
-#文字の包含の部分。現状連続した文字が包含されているかどうかしか見ていない(ポケットモンスターがポケモンのように連続していない略語は0となる)
+#文字の包含の素性。現状連続した文字が包含されているかどうかしか見ていない(ポケットモンスターがポケモンのように連続していない略語は0となる)
 def character_inclusion(read_file):
+    #Nは言い換えの数を表す。対数尤度比による共起度の素性を出すときのパラメータに使う
+    N = 0
+    for line in open(read_file,"r"):
+        N += 1
+
     for line in open(read_file,"r"):
         line = line.strip()
         temporary_features_list = line.split(",")
@@ -44,11 +49,11 @@ def character_inclusion(read_file):
         else:
             #一事例に対して素性は一つはなければならないので一時的に1:0をappendするようにするが、本来0の素性はappendしない
             temporary_features_list.append("1:0")
-        co_occur_value(temporary_features_list[1], temporary_features_list[2], temporary_features_list)
+        co_occur_value(temporary_features_list[1], temporary_features_list[2], temporary_features_list, N)
         features_list.append(temporary_features_list)
 
-def co_occur_value(X, Y, temporary_features_list):
-    N = 3746
+#対数尤度比による共起度の素性。     
+def co_occur_value(X, Y, temporary_features_list, N):
     n11 = 0
     n12 = 0
     n21 = 0
