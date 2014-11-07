@@ -23,9 +23,16 @@ def mkFeatures(X, Y, featureIDs, refFileLines):
       12:chanceParaOfXY
     }
 
+  #Nは言い換えの数を表す。対数尤度比による共起度の素性を出すときのパラメータに使う
+  N = 0
+  for line in open(read_file,"r"):
+    N += 1
+
   for ID in featureIDs:
     if 8 <= ID <= 11:
       feature_of[ID] = mkFeature_of[ID](X, Y, eval('list_' + str(ID)))
+    elif ID == 4:
+      feature_of[ID] = mkFeature_of[ID](X, Y, refFileLines, N)
     else:
       feature_of[ID] = mkFeature_of[ID](X, Y, refFileLines)
     # print feature_of[ID]
@@ -61,9 +68,22 @@ def countOfY(X, Y, refFileLines):
   return str(count)
 
 
-def sqrChiOfXY(X, Y, refFileLines):
-  pass
-
+def sqrChiOfXY(X, Y, refFileLines, N):
+    n11 = 0
+    n12 = 0
+    n21 = 0
+    n22 = 0
+    kay_square = 0
+    log_likelihood_ratio = 0
+    if X + Y in XY_value_dic_for_co_occur:
+        n11 = XY_value_dic_for_co_occur[X + Y]
+    if X in X_value_dic_for_co_occur:
+        n12 = X_value_dic_for_co_occur[X] - n11
+    if Y in Y_value_dic_for_co_occur:
+        n21 = Y_value_dic_for_co_occur[Y] - n11
+    n22 = N - n11 - n12 - n21
+    kay_square = N * (n11 * n22 - n12 * n21) * (n11 * n22 - n12 * n21) / ((n11 + n12) * (n21 + n22) * (n11 + n21) * (n12 + n22))
+    return kay_square
 
 def logliklyhoodOfXY(X, Y, refFileLines):
   pass
@@ -150,7 +170,7 @@ if __name__ == '__main__':
   for i in range(len(refFileLines)):
     refFileLines[i] = refFileLines[i].decode('utf-8')
 
-  featureIDs = [1, 2, 3, 6, 8, 9, 11]
+  featureIDs = [1, 2, 3, 4, 6, 8, 9, 11]
   list_8  = []
   list_9  = []
   list_10 = []
