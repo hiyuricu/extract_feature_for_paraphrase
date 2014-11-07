@@ -5,8 +5,13 @@
 # Created at: 2014-10-12
 
 import sys, re
+from collections import defaultdict
 
-def mkFeatures(X, Y, featureIDs, refFileLines):
+X_value_dic_for_co_occur = defaultdict(int)
+Y_value_dic_for_co_occur = defaultdict(int)
+XY_value_dic_for_co_occur = defaultdict(int)
+
+def mkFeatures(X, Y, featureIDs, refFileLines, N):
   feature_of = {}
   mkFeature_of = {
       1: countOfXY,
@@ -23,16 +28,11 @@ def mkFeatures(X, Y, featureIDs, refFileLines):
       12:chanceParaOfXY
     }
 
-  #Nは言い換えの数を表す。対数尤度比による共起度の素性を出すときのパラメータに使う
-  N = 0
-  for line in open(read_file,"r"):
-    N += 1
-
   for ID in featureIDs:
     if 8 <= ID <= 11:
       feature_of[ID] = mkFeature_of[ID](X, Y, eval('list_' + str(ID)))
     elif ID == 4:
-      feature_of[ID] = mkFeature_of[ID](X, Y, refFileLines, N)
+      feature_of[ID] = mkFeature_of[ID](X, Y, N)
     else:
       feature_of[ID] = mkFeature_of[ID](X, Y, refFileLines)
     # print feature_of[ID]
@@ -68,7 +68,7 @@ def countOfY(X, Y, refFileLines):
   return str(count)
 
 
-def sqrChiOfXY(X, Y, refFileLines, N):
+def sqrChiOfXY(X, Y, N):
     n11 = 0
     n12 = 0
     n21 = 0
@@ -170,21 +170,33 @@ if __name__ == '__main__':
   for i in range(len(refFileLines)):
     refFileLines[i] = refFileLines[i].decode('utf-8')
 
-  featureIDs = [1, 2, 3, 4, 6, 8, 9, 11]
+  #featureIDsは実際に作る素性を選択している
+  #featureIDs = [1, 2, 3, 4, 6, 8, 9, 11]
+  featureIDs = [4]
   list_8  = []
   list_9  = []
   list_10 = []
   list_11 = []
+
+  #Nは言い換えの数を表す。対数尤度比による共起度の素性を出すときのパラメータに使う
+  N = 0
+  for line in open(sys.argv[1]):
+    N += 1
+    ans, X, Y = line.strip().decode('utf-8').split(',')
+    X_value_dic_for_co_occur[X] += 1
+    Y_value_dic_for_co_occur[Y] += 1
+    XY_value_dic_for_co_occur[X + Y] += 1
+
   for line in open(sys.argv[1]): # CSV file: ans, X, Y
     # print line
     ans, X, Y = line.strip().decode('utf-8').split(',')
-    feature_of = mkFeatures(X, Y, featureIDs, refFileLines)
+    feature_of = mkFeatures(X, Y, featureIDs, refFileLines, N)
 
     sys.stdout.write('%s\t' % ans.encode('utf-8'))
     if len(featureIDs) != 1:
       for i in range(len(featureIDs) - 1):
         sys.stdout.write('%d:%s\t' % (featureIDs[i], feature_of[featureIDs[i]]))
-    sys.stdout.write('%d:%s\n' % (featureIDs[-1], feature_of[featureIDs[-1]])) 
+    sys.stdout.write('%d:%s\n' % (featureIDs[-1], feature_of[featureIDs[-1]]))
 
   with open('ID8.txt', 'w') as id8:
     for id, text in enumerate(list_8):
