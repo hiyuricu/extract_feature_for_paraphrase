@@ -71,14 +71,27 @@ def co_occur_value(X, Y, temporary_features_list, N):
     temporary_features_list.append("2:%s" % kay_square)
 
     #対数尤度比を出すための式をそれぞれ書き出していく
-    element11 = n11 * (math.log(n11 / N, 2) - math.log((n11 + n12) * (n11 + n21) / (N * N), 2))
-    element12 = n12 * (math.log(n12 / N, 2) - math.log((n11 + n12) * (n12 + n22) / (N * N), 2))
-    element21 = n21 * (math.log(n21 / N, 2) - math.log((n21 + n22) * (n11 + n21) / (N * N), 2))
-    element22 = n22 * (math.log(n22 / N, 2) - math.log((n21 + n22) * (n12 + n22) / (N * N), 2))
+    if n11 == 0:
+        element11 = 0
+    else:    
+        element11 = n11 * (math.log(float(n11) / N, 2) - math.log(float(n11 + n12) * (n11 + n21) / (N * N), 2))
+    
+    if n12 == 0:
+        element12 = 0
+    else:    
+        element12 = n12 * (math.log(float(n12) / N, 2) - math.log(float(n11 + n12) * (n12 + n22) / (N * N), 2))
+    
+    if n21 == 0:
+        element21 = 0
+    else:    
+        element21 = n21 * (math.log(float(n21) / N, 2) - math.log(float(n21 + n22) * (n11 + n21) / (N * N), 2))
+    
+    if n22 == 0:
+        element22 = 0
+    else:    
+        element22 = n22 * (math.log(float(n22) / N, 2) - math.log(float(n21 + n22) * (n12 + n22) / (N * N), 2))
+    
     log_likelihood_ratio = 2 + 2 * (element11 + element12 + element21 + element22)
-
-
-
 
 
 if __name__ == "__main__":
