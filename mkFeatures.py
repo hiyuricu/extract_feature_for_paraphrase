@@ -5,6 +5,7 @@
 # Created at: 2014-10-12
 
 import sys, re
+import math
 from collections import defaultdict
 
 X_value_dic_for_co_occur = defaultdict(int)
@@ -31,7 +32,7 @@ def mkFeatures(X, Y, featureIDs, refFileLines, N):
   for ID in featureIDs:
     if 8 <= ID <= 11:
       feature_of[ID] = mkFeature_of[ID](X, Y, eval('list_' + str(ID)))
-    elif ID == 4:
+    elif 4 <= ID <= 5:
       feature_of[ID] = mkFeature_of[ID](X, Y, N)
     else:
       feature_of[ID] = mkFeature_of[ID](X, Y, refFileLines)
@@ -74,7 +75,6 @@ def sqrChiOfXY(X, Y, N):
     n21 = 0
     n22 = 0
     kay_square = 0
-    log_likelihood_ratio = 0
     if X + Y in XY_value_dic_for_co_occur:
         n11 = XY_value_dic_for_co_occur[X + Y]
     if X in X_value_dic_for_co_occur:
@@ -85,9 +85,43 @@ def sqrChiOfXY(X, Y, N):
     kay_square = N * (n11 * n22 - n12 * n21) * (n11 * n22 - n12 * n21) / ((n11 + n12) * (n21 + n22) * (n11 + n21) * (n12 + n22))
     return kay_square
 
-def logliklyhoodOfXY(X, Y, refFileLines):
-  pass
+def logliklyhoodOfXY(X, Y, N):
+    n11 = 0
+    n12 = 0
+    n21 = 0
+    n22 = 0
+    log_likelihood_ratio = 0
+    if X + Y in XY_value_dic_for_co_occur:
+        n11 = XY_value_dic_for_co_occur[X + Y]
+    if X in X_value_dic_for_co_occur:
+        n12 = X_value_dic_for_co_occur[X] - n11
+    if Y in Y_value_dic_for_co_occur:
+        n21 = Y_value_dic_for_co_occur[Y] - n11
+    n22 = N - n11 - n12 - n21
 
+    #対数尤度比を出すための式をそれぞれ書き出していく
+    if n11 == 0:
+        element11 = 0
+    else:    
+        element11 = n11 * (math.log(float(n11) / N, 2) - math.log(float(n11 + n12) * (n11 + n21) / (N * N), 2))
+    
+    if n12 == 0:
+        element12 = 0
+    else:    
+        element12 = n12 * (math.log(float(n12) / N, 2) - math.log(float(n11 + n12) * (n12 + n22) / (N * N), 2))
+    
+    if n21 == 0:
+        element21 = 0
+    else:    
+        element21 = n21 * (math.log(float(n21) / N, 2) - math.log(float(n21 + n22) * (n11 + n21) / (N * N), 2))
+    
+    if n22 == 0:
+        element22 = 0
+    else:    
+        element22 = n22 * (math.log(float(n22) / N, 2) - math.log(float(n21 + n22) * (n12 + n22) / (N * N), 2))
+    
+    log_likelihood_ratio = 2 + 2 * (element11 + element12 + element21 + element22)
+    return log_likelihood_ratio
 
 def containingOfXY(X, Y, refFileLines):
   for x in X:
@@ -171,8 +205,8 @@ if __name__ == '__main__':
     refFileLines[i] = refFileLines[i].decode('utf-8')
 
   #featureIDsは実際に作る素性を選択している
-  #featureIDs = [1, 2, 3, 4, 6, 8, 9, 11]
-  featureIDs = [4]
+  #featureIDs = [1, 2, 3, 4, 5, 6, 8, 9, 11]
+  featureIDs = [5]
   list_8  = []
   list_9  = []
   list_10 = []
