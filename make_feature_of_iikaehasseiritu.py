@@ -5,12 +5,15 @@ import sys,string,re
 
 #論文の日本語新聞記事からの略語抽出の素性の一つである言い換え発生率の素性を作るコードである
 #paraphrase_csv_fileはcsv_file,newspaper_fileはtxt_fileを想定している
+#この素性は本文ファイル(newspaper_file)に依存しているので、新聞記事から抽出した言い換えペアは新聞記事で、wikipediaから抽出した言い換えペアはwikipediaで対応させなければならないかもしれない
+#for文を二重に回しているので修正したい
 def main(paraphrase_csv_file,newspaper_file):
     wf = open("feature_of_iikaehasseiritu.txt","w")
     for line in open(paraphrase_csv_file,"r"):
         line = line.strip()
         csv_list = line.split(",")
-        paraphrase = "%s(%s)" % (csv_list[1], csv_list[2])
+        #毎日新聞においては括弧は全角で扱われている
+        paraphrase = "%s（%s）" % (csv_list[1], csv_list[2])
 
         bunbo = 0
         bunshi = 0
@@ -18,6 +21,7 @@ def main(paraphrase_csv_file,newspaper_file):
         expression_X = 0
         expression_Y = 0
         expression_Y_flag = 0
+        print paraphrase
         for line in open(newspaper_file,"r"):
             #空白行があれば文書が変わったことを示すので分子の値を計算してからそれぞれのパラメータとフラグを初期化する
             if line == "":
@@ -46,7 +50,7 @@ def main(paraphrase_csv_file,newspaper_file):
 
         if not bunbo == 0:
             #0以上1以下の値になるはずである
-            print bunshi / bunbo
+            print float(bunshi) / bunbo
         else:
             print 0
     wf.close()
