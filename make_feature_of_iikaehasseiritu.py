@@ -24,7 +24,7 @@ def main(paraphrase_csv_file,newspaper_file):
         print paraphrase
         for line in open(newspaper_file,"r"):
             #空白行があれば文書が変わったことを示すので分子の値を計算してからそれぞれのパラメータとフラグを初期化する
-            if line == "":
+            if line == "\n":
                 if discover_paraphrase_flag == 1 and expression_Y - expression_X > 0 and expression_Y_flag == 0:
                     bunshi += 1
                 discover_paraphrase_flag = 0
