@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-#
 # Author: Peinan ZHANG
 # Created at: 2014-10-12
 
@@ -173,8 +172,50 @@ def strTypeOfXY(X, Y, list_11):
   return encode_to_id(result_str, list_11)
 
 
+#論文の日本語新聞記事からの略語抽出の素性の一つである言い換え発生率の素性を作るコードである
+#paraphrase_csv_fileはcsv_file,newspaper_fileはtxt_fileを想定している
+#この素性は本文ファイル(newspaper_file)に依存しているので、新聞記事から抽出した言い換えペアは新聞記事で、wikipediaから抽出した言い換えペアはwikipediaで対応させなければならないかもしれない
+#for文を二重に回しているので修正したい
 def chanceParaOfXY(X, Y, refFileLines):
-  pass
+  paraphrase = u"%s（%s）" % (X, Y)
+
+  bunbo = 0
+  bunshi = 0
+  discover_paraphrase_flag = 0
+  expression_X = 0
+  expression_Y = 0
+  expression_Y_flag = 0
+  for line in refFileLines:
+      #空白行があれば文書が変わったことを示すので分子の値を計算してからそれぞれのパラメータとフラグを初期化する
+      if line == "\n":
+          if discover_paraphrase_flag == 1 and expression_Y - expression_X > 0 and expression_Y_flag == 0:
+              bunshi += 1
+          discover_paraphrase_flag = 0
+          expression_X = 0
+          expression_Y = 0
+          expression_Y_flag = 0
+      #言い換え表現が出てくる後の文において表現Xと表現Yが何回出現するかどうか見ている。
+      #文章単位で表現の数を数えている可能性(一文に2つ以上表現XやYが現れても＋1しかされない可能性)があるのでコードを変える必要があるかもしれない
+      elif discover_paraphrase_flag == 1:
+          if re.search(X, line):
+              expression_X += 1
+          if re.search(Y, line):
+              expression_Y += 1
+      #言い換え表現があれば言い換え表現フラグをたてて分母を1プラスする
+      elif re.search(paraphrase, line):
+          if not discover_paraphrase_flag == 1:
+              bunbo += 1
+              discover_paraphrase_flag = 1
+      #言い換え表現が出てくる前の文において表現Yが出現するかどうか見ている。出てきたらフラグをたてる。
+      elif discover_paraphrase_flag == 0:
+          if re.search(Y, line):
+              expression_Y_flag = 1
+
+  if not bunbo == 0:
+      #0以上1以下の値になるはずである
+      return float(bunshi) / bunbo
+  else:
+            return 0
 
 
 def caboChaProc(text, mode):
@@ -205,8 +246,8 @@ if __name__ == '__main__':
     refFileLines[i] = refFileLines[i].decode('utf-8')
 
   #featureIDsは実際に作る素性を選択している
-  #featureIDs = [1, 2, 3, 4, 5, 6, 8, 9, 11]
-  featureIDs = [5]
+  #featureIDs = [1, 2, 3, 4, 5, 6, 8, 9, 11, 12]
+  featureIDs = [12]
   list_8  = []
   list_9  = []
   list_10 = []
