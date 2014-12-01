@@ -24,9 +24,9 @@ def convertWrite(featureDict, convertIDs):
     if k == 8:
       writeLine += '%d:%d\t' % (int(v) + 100, 1)
     elif k == 9:
-      writeLine += '%d:%d\t' % (int(v) + 1000, 1)
+      writeLine += '%d:%d\t' % (int(v) + 300, 1)
     elif k == 11:
-      writeLine += '%d:%d\t' % (int(v) + 10000, 1)
+      writeLine += '%d:%d\t' % (int(v) + 400, 1)
     elif k == 0:
       writeLine += '%s\t' % v
     else:
@@ -50,6 +50,6 @@ if __name__ == '__main__':
         if ID == 8:
           idfile.write('%d\t%s' % (int(id_before) + 100, content))
         elif ID == 9:
-          idfile.write('%d\t%s' % (int(id_before) + 1000, content))
+          idfile.write('%d\t%s' % (int(id_before) + 300, content))
         elif ID == 11:
-          idfile.write('%d\t%s' % (int(id_before) + 10000, content))
+          idfile.write('%d\t%s' % (int(id_before) + 400, content))
