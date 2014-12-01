@@ -7,12 +7,13 @@
 import sys
 
 def readLine(line):
+  # print line
   featureDict = {}
   items = line.strip().split('\t')
   featureDict[0] = items[0]
   for item in items[1:]:
     featureID, content = item.split(':')
-    featureDict[int(featureID)] = int(content)
+    featureDict[int(featureID)] = content
 
   return featureDict
 
@@ -21,15 +22,15 @@ def convertWrite(featureDict, convertIDs):
   writeLine = ''
   for k, v in sorted(featureDict.items()):
     if k == 8:
-      writeLine += '%d:%d\t' % (v + 100, 1)
+      writeLine += '%d:%d\t' % (int(v) + 100, 1)
     elif k == 9:
-      writeLine += '%d:%d\t' % (v + 1000, 1)
+      writeLine += '%d:%d\t' % (int(v) + 1000, 1)
     elif k == 11:
-      writeLine += '%d:%d\t' % (v + 10000, 1)
+      writeLine += '%d:%d\t' % (int(v) + 10000, 1)
     elif k == 0:
       writeLine += '%s\t' % v
     else:
-      writeLine += '%d:%d\t' % (k, v)
+      writeLine += '%d:%s\t' % (k, v)
   sys.stdout.write(writeLine[:-1] + '\n')
 
 
