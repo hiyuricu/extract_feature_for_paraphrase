@@ -5,12 +5,12 @@ import sys
 from collections import defaultdict
 import math
 
-def extract_NE_feature(cabocha_processed_file):
+def extract_NE_feature():
 
     NE_list = []
     temp_NE = ""
 
-    for line in open(cabocha_processed_file, "r"):
+    for line in sys.stdin:
         if line[0:3] == "EOS":
             NE_list.append(temp_NE)
 
@@ -27,5 +27,5 @@ def extract_NE_feature(cabocha_processed_file):
     return NE_list
 
 if __name__ == "__main__":
-    for NE in extract_NE_feature(sys.argv[1]):
+    for NE in extract_NE_feature():
         print NE
