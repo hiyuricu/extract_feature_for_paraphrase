@@ -74,23 +74,17 @@ if __name__ == "__main__":
         ans, X, Y = line.strip().split(',')
         all_skew_divergence = 0
         if X in dependency_word_dic:
-            print "-------------------------------------------------------------------"
-            print X
             #dependency_wordがP(i)やQ(i)のi(係られている単語)のことである
             for dependency_word, dependency_word_value in dependency_word_dic[X].items():
-                print dependency_word,dependency_word_value
                 if dependency_word != "all":
                     Pi = float(dependency_word_dic[X][dependency_word]) / float(dependency_word_dic[X]["all"])
-                    print "Pi:%s" % Pi
                     if Y in dependency_word_dic and dependency_word in dependency_word_dic[Y]:
                         Qi = float(dependency_word_dic[Y][dependency_word]) / float(dependency_word_dic[Y]["all"])
                     else:
                         Qi = 0
                     one_of_skew_divergence = Pi * math.log(Pi / (0.99 * Qi + 0.01 * Pi))
-                    print one_of_skew_divergence
                     all_skew_divergence += one_of_skew_divergence
-            print all_skew_divergence
-        # print "10:%s" % all_skew_divergence
+        print "10:%s" % all_skew_divergence
 
 
 
