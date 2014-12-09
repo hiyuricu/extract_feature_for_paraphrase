@@ -5,6 +5,8 @@ import sys
 from collections import defaultdict
 import math
 
+#まず全ての係り関係がわかっている辞書を作る。その辞書のキーにXやYがあるかどうかみてあったらXとYの頻度をその辞書からとってくるようにする
+#その辞書のkeyは係っている文節の行頭の漢字連続(カタカナ連続とか)、valueには辞書が入っている。またそのvalueになっている辞書のkeyは係られている文節の行頭の漢字連続(カタカナ連続とか)、valueには係られている文節の行頭の漢字連続の頻度になっている
 def extract_skew_divergence(cabocha_processed_file, csv_file):
 
     dependency_word_dic = defaultdict(dict)
