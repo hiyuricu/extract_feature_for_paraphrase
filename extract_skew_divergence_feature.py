@@ -6,76 +6,65 @@ from collections import defaultdict
 import math
 
 #まず全ての係り関係がわかっている辞書を作る。その辞書のキーにXやYがあるかどうかみてあったらXとYの頻度をその辞書からとってくるようにする
-#その辞書のkeyは係っている文節の行頭の漢字連続(カタカナ連続とか)、valueには辞書が入っている。またそのvalueになっている辞書のkeyは係られている文節の行頭の漢字連続(カタカナ連続とか)、valueには係られている文節の行頭の漢字連続の頻度になっている
-def extract_skew_divergence(cabocha_processed_file, csv_file):
+#その辞書のkeyは係っている文節の行頭の品詞連続(名詞連続とか)、valueには辞書が入っている。またそのvalueになっている辞書のkeyは係られている文節の行頭の品詞連続(名詞連続とか)、valueには係られている文節の行頭の品詞連続の頻度になっている
+def extract_skew_divergence(cabocha_processed_file):
 
-    dependency_word_dic = defaultdict(dict)
-    string = ""
-    string_list = []
-    line_features_temp_list = []
-    phrase_temp_dic = {}
+    dependency_word_dic = defaultdict(lambda: defaultdict(int))
+    phrase_temp_dic = {} #keyがown_number、valueはbeginning_of_line_sentenceとdependency_numberのリストにする
+    own_number = 0
+    dependency_number = 0
+    beginning_of_line_flag = 0
+    beginning_of_line_sentence = ""
+    temporary_beginning_of_line_sentence = ""
+    temporary_a_part_of_speech_info = ""
 
-    for csv_line in open(csv_file, "r"):
-        ans, X, Y = csv_line.strip().split(',')
-        for line in open(cabocha_processed_file, "r"):
+    for line in open(cabocha_processed_file, "r"):
 
-            line = line.strip()
-            if line[0:7] == "* 0 -1D":
-                pass
+        line = line.strip()
+        if line[0:7] == "* 0 -1D":
+            pass
 
-            elif line[0:2] == "* ":
-                if string != "" and line_features_temp_list != []:
-                    phrase_temp_dic[string] = [line_features_temp_list[1], line_features_temp_list[2][0:-1]]
-                    string_list.append(string)
-                    string = ""
-                line_features_temp_list = line.split(" ")
-
-            elif line[0:3] == "EOS":
-                if string != "" and line_features_temp_list != []:
-                    phrase_temp_dic[string] = [line_features_temp_list[1], line_features_temp_list[2][0:-1]]
-                    string_list.append(string)
-                    for string in string_list:
-                        if X in string:
-                            for key, value_list in phrase_temp_dic.items():
-                                #phrase_temp_dicのvalueには係り受け解析の番号(listの一つ目の要素は0、二つ目は6Dみたいな感じ)が入っているので、
-                                #ここで番号が一致しているかどうかみることで単語間の係り受け関係を見ている
-                                if phrase_temp_dic[string][1] == value_list[0]:
-                                    if key in dependency_word_dic[X]:
-                                        dependency_word_dic[X][key] += 1
-                                    else:
-                                        dependency_word_dic[X][key] = 1
-
-                                    if "all" in dependency_word_dic[X]:
-                                        dependency_word_dic[X]["all"] += 1
-                                    else:
-                                        dependency_word_dic[X]["all"] = 1
-
-                        if Y in string:
-                            for key, value_list in phrase_temp_dic.items():
-                                if phrase_temp_dic[string][1] == value_list[0]:
-                                    if key in dependency_word_dic[Y]:
-                                        dependency_word_dic[Y][key] += 1
-                                    else:
-                                        dependency_word_dic[Y][key] = 1
-
-                                    if "all" in dependency_word_dic[Y]:
-                                        dependency_word_dic[Y]["all"] += 1
-                                    else:
-                                        dependency_word_dic[Y]["all"] = 1
-
-                phrase_temp_dic = {}
-                string_list = []
-                string = ""
-                line_features_temp_list = []
-
+        elif line[0:2] == "* ":
+            if beginning_of_line_sentence != "":
+                phrase_temp_dic[own_number] = [beginning_of_line_sentence, dependency_number]
+            own_number = line.split()[1]
+            if line.split()[2][0] == "-":
+                dependency_number = line.split()[2][1]
             else:
-                string = string + line.split("\t")[0]
+                dependency_number = line.split()[2][0]
 
-    #dependency_word_dicはvalueに辞書を持つdefaultdictです
+            #ここで初期化を行っている
+            beginning_of_line_flag = 1
+            temporary_beginning_of_line_sentence = ""
+            beginning_of_line_sentence = ""
+
+        elif line[0:3] == "EOS":
+            if beginning_of_line_sentence != "":
+                phrase_temp_dic[own_number] = [beginning_of_line_sentence, dependency_number]
+
+                #ここでphrase_temp_dicからdependency_word_dicを作る
+                for key, value_list in phrase_temp_dic.items():
+                    dependency_word_dic[key][phrase_temp_dic[value_list[1]][0]] += 1
+                    dependency_word_dic[key]["all"] += 1
+
+            beginning_of_line_sentence = ""
+
+        else:
+            if beginning_of_line_flag == 1 and temporary_beginning_of_line_sentence = "":#行頭の時
+                temporary_beginning_of_line_sentence = line.split()[0]
+                temporary_a_part_of_speech_info = line.split()[1].split(",")[0]
+            elif beginning_of_line_flag == 1 and temporary_beginning_of_line_sentence != "":#行頭から品詞が継続しているか見る所
+                if temporary_a_part_of_speech_info == line.split()[1].split(",")[0]:
+                    temporary_beginning_of_line_sentence = temporary_beginning_of_line_sentence + line.split()[0]
+                else:
+                    beginning_of_line_sentence = temporary_beginning_of_line_sentence
+                    beginning_of_line_flag = 0
+
+    #dependency_word_dicは辞書でvalueに辞書を持ち、その辞書のvalueはintになっているdefaultdictです
     return dependency_word_dic
 
 if __name__ == "__main__":
-    dependency_word_defaultdict_dic = extract_skew_divergence(sys.argv[1], sys.argv[2])
+    dependency_word_defaultdict_dic = extract_skew_divergence(sys.argv[1])
     for line in open(sys.argv[2], "r"):
         ans, X, Y = line.strip().split(',')
         all_skew_divergence = 0
