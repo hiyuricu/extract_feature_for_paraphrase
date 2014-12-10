@@ -17,11 +17,13 @@ def extract_skew_divergence(cabocha_processed_file):
     beginning_of_line_sentence = ""
     temporary_beginning_of_line_sentence = ""
     temporary_a_part_of_speech_info = ""
+    ignore_line_flag = 0
 
     for line in open(cabocha_processed_file, "r"):
 
         line = line.strip()
         if line[0:7] == "* 0 -1D":
+            ignore_line_flag = 1
             pass
 
         elif line[0:2] == "* ":
@@ -39,7 +41,7 @@ def extract_skew_divergence(cabocha_processed_file):
             beginning_of_line_sentence = ""
 
         elif line[0:3] == "EOS":
-            if beginning_of_line_sentence != "":
+            if beginning_of_line_sentence != "" and ignore_line_flag == 0:
                 phrase_temp_dic[own_number] = [beginning_of_line_sentence, dependency_number]
 
                 #ここでphrase_temp_dicからdependency_word_dicを作る
@@ -51,19 +53,21 @@ def extract_skew_divergence(cabocha_processed_file):
                         dependency_word_dic[value_list[0]]["all"] += 1
 
             beginning_of_line_sentence = ""
+            ignore_line_flag = 0
 
         else:
-            if beginning_of_line_flag == 1 and temporary_beginning_of_line_sentence == "":#行頭の時
+            if beginning_of_line_flag == 1 and temporary_beginning_of_line_sentence == "" and ignore_line_flag == 0:#行頭の時
                 temporary_beginning_of_line_sentence = line.split()[0]
                 temporary_a_part_of_speech_info = line.split()[1].split(",")[0]
                 beginning_of_line_sentence = temporary_beginning_of_line_sentence
-            elif beginning_of_line_flag == 1 and temporary_beginning_of_line_sentence != "":#行頭から品詞が継続しているか見る所
-                if temporary_a_part_of_speech_info == line.split()[1].split(",")[0]:
-                    temporary_beginning_of_line_sentence = temporary_beginning_of_line_sentence + line.split()[0]
-                    beginning_of_line_sentence = temporary_beginning_of_line_sentence
-                else:#行頭から品詞が継続していなかった後の場合
-                    beginning_of_line_sentence = temporary_beginning_of_line_sentence
-                    beginning_of_line_flag = 0
+            elif beginning_of_line_flag == 1 and temporary_beginning_of_line_sentence != "" and ignore_line_flag == 0:#行頭から品詞が継続しているか見る所
+                if "    " in line:
+                    if temporary_a_part_of_speech_info == line.split()[1].split(",")[0]:#list index out of rangeになった
+                        temporary_beginning_of_line_sentence = temporary_beginning_of_line_sentence + line.split()[0]
+                        beginning_of_line_sentence = temporary_beginning_of_line_sentence
+                    else:#行頭から品詞が継続していなかった後の場合
+                        beginning_of_line_sentence = temporary_beginning_of_line_sentence
+                        beginning_of_line_flag = 0
 
     #dependency_word_dicは辞書でvalueに辞書を持ち、その辞書のvalueはintになっているdefaultdictです
     return dependency_word_dic
