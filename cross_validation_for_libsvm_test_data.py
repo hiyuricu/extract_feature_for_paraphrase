@@ -27,8 +27,13 @@ def cross_validation():
             if remainder - i - 1 > -1:
                 pf.write(line_list[value - i - 1])
 
+        text_name2 = "mainichi98_99_feature/mainichi9899_12_feature/tagging_sources/tagging_sources.%s" % (i + 1)
+        with open(text_name2, "w") as pf:
+            for j in range(i * quotient, (i + 1) * quotient):
+                pf.write("%s\n" % line_list[j].strip().split()[0])
+
+            if remainder - i - 1 > -1:
+                pf.write(line_list[value - i - 1].strip().split()[0])
 
 if __name__ == "__main__":
     cross_validation()
-
-
