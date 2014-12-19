@@ -4,7 +4,7 @@
 import urllib2, time, sys, jctconv, os.path
 
 #wikipediaのhtmlをクロールします
-f1 = open("error_url", "w")
+f1 = open("error_url", "a")
 i = 0
 
 for abb_pair_list in open(sys.argv[1], "r"):
@@ -20,17 +20,17 @@ for abb_pair_list in open(sys.argv[1], "r"):
         url_text = "http://ja.wikipedia.org/wiki/%s" % target_title3
         try:
             url = urllib2.urlopen(url_text).read()
+            time.sleep(10.0)
         except:
-            f1.write(url_text)
+            f1.write("%s\n") % url_text
             continue
         f.write(url)
         f.close()
-        time.sleep(10.0)
 
 f1.close()
 
 
-f2 = open("error_url2", "w")
+f2 = open("error_url2", "a")
 i = 0
 
 for abb_pair_list in open(sys.argv[1], "r"):
@@ -46,12 +46,12 @@ for abb_pair_list in open(sys.argv[1], "r"):
         url_text = "http://ja.wikipedia.org/wiki/%s" % target_title3
         try:
             url = urllib2.urlopen(url_text).read()
+            time.sleep(10.0)
         except:
-            f1.write(url_text)
+            f1.write("%s\n") % url_text
             continue
         f.write(url)
         f.close()
-        time.sleep(10.0)
 
 f2.close()
 
